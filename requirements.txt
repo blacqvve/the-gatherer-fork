@@ -5,4 +5,4 @@
 opencv-python
 customtkinter
 pyautogui
-pywin32
+# pywin32

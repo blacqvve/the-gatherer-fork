@@ -1,5 +1,4 @@
 import numpy as np
-import win32gui, win32ui, win32con
 
 class WindowCapture:
     
@@ -12,18 +11,23 @@ class WindowCapture:
 
 
     def __init__(self, window_name=None, width=1024, height=768):
+        try:
+            import win32gui, win32ui, win32con
         
-        if window_name is None:
-            self.hwnd = win32gui.GetDesktopWindow()
-        else:
-        #Call specific window to capture
-            self.hwnd = win32gui.FindWindow(None, window_name)
+            if window_name is None:
+                self.hwnd = win32gui.GetDesktopWindow()
+            else:
+            #Call specific window to capture
+                self.hwnd = win32gui.FindWindow(None, window_name)
             if not self.hwnd:
                 raise Exception("Window not found: {}".format(window_name))
         
-        #Define monitor dimentions
-        self.w = width #1366
-        self.h = height #768
+            #Define monitor dimentions
+            self.w = width #1366
+            self.h = height #768
+        except ImportError:
+            print("Please install pywin32")
+            print("pip install pywin32")
     
     def get_screenshot(self):
         #bmpfilenamename = "out.bmp" #set this

@@ -6,6 +6,8 @@ from bot_thread import *
 import cv2
 import sys
 
+from window_capture_macos import WindowCaptureMacos
+
 #Move Albion Client to the corner of the screen
 
 #Bot thread
@@ -25,7 +27,7 @@ class App(ctk.CTk):
         self.is_cuda = len(sys.argv) > 1 and sys.argv[1] == "cuda"
         self.net = build_model(self.is_cuda, f"models/{self.model}")
 
-        self.resolution = "1024x720"
+        self.resolution = "1920x1200"
         self.waiting_time = 3.5
         self.width, self.height = self.resolution.split('x')
         self.screen_center = [int(self.width)/2, int(self.height)/2]
@@ -33,7 +35,11 @@ class App(ctk.CTk):
 
         self.vision_status = "off"
         self.bot_status = "off"
-        self.wincap = WindowCapture(None)
+        if sys.platform.startswith('win32'):
+            self.wincap = WindowCapture(None)
+        elif sys.platform.startswith('darwin'):
+            self.wincap = WindowCaptureMacos()
+            
 
         self.class_ids, self.confidences, self.boxes, self.class_list, self.centers = [], [], [], [], []
         
@@ -67,7 +73,11 @@ class App(ctk.CTk):
             print(f"Using: {self.model}")
             
             self.width, self.height = self.game_size_box.get_option().split('x')
-            self.wincap = WindowCapture(None, width=int(self.width), height=int(self.height))
+            if sys.platform.startswith('win32'):
+                self.wincap = WindowCapture(None, width=int(self.width), height=int(self.height))
+            elif sys.platform.startswith('darwin'):
+                self.wincap = WindowCaptureMacos()
+                
             print(f"Game resolution: {self.width}x{self.height}")
             
             self.waiting_time = float(self.waiting_time_frame.get_value())
@@ -77,9 +87,10 @@ class App(ctk.CTk):
 
         #Creating Objects
         self.actions_frame = SwitchesFrame(self, name="Actions", text1="Display bot's vision", text2="Gather resources", command_name1 = update_vision_status, command_name2 = update_bot_status)
-        self.game_size_box = DropdownFrame(self, name="Select Window Size", text="Game resolution", default="1024x720" , options=["1024x720","1280x720", "1280x1024", "1366x768", "1600x900", "1680x1050", "1920x1080"])
+        self.game_size_box = DropdownFrame(self, name="Select Window Size", text="Game resolution", default="1920x1200" , options=["1920x1200","1024x720","1280x720", "1280x1024", "1366x768", "1600x900", "1680x1050", "1920x1080"])
         self.onnx_model_box = DropdownFrame(self, name="Select detection model", text="Onnx model", default="rough_stone.onnx", options=self.models)
         self.update_info_button = ctk.CTkButton(self, text="Save changes", command=update_info)
+        self.screenshot_button = ctk.CTkButton(self, text="Take Screenshot", command=self.wincap.get_screenshot)
         self.waiting_time_frame = SingleEntryFrame(self, header_name="EntryFrame1", name="Waiting Time", text="3.5", default=3.5)
         
 
@@ -89,6 +100,7 @@ class App(ctk.CTk):
         self.game_size_box.grid(row=0, column=1, pady=12, padx=10)
         self.onnx_model_box.grid(row=1, column=1, pady=12, padx=10)
         self.update_info_button.grid(row=2, column=0, padx=20, pady=10)
+        self.screenshot_button.grid(row=2, column=1, padx=20, pady=10)
 
 
 
