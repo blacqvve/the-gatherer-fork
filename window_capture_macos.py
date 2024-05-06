@@ -1,7 +1,7 @@
 from array import array
 from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, CGWindowListCreateImageFromArray, CGRectNull, kCGWindowImageDefault
 from Quartz.CoreGraphics import CGImageGetWidth, CGImageGetHeight, CGImageGetDataProvider, CGDataProviderCopyData
-from PIL import Image
+from PIL import Image, ImageGrab
 import numpy as np
 import os
 
@@ -39,10 +39,10 @@ class WindowCaptureMacos:
         data = CGDataProviderCopyData(data_provider)
     
     
-        os.system('screencapture -x -l %s %s' % (self.window_id, 'screenshot.png'))
+        os.system('screencapture -x -l -x %s' % (self.window_id))
         
         # pil_image = Image.frombytes("RGBA", (width, height), bytes(data))
-        pil_image = Image.open('screenshot.png')
+        pil_image = ImageGrab.grabclipboard()
         # Save the PIL Image
         # pil_image.save("screenshot.png")
         
@@ -58,9 +58,5 @@ class WindowCaptureMacos:
         
         # Ensure the array is C-contiguous for some cv2 functions
         img = np.ascontiguousarray(img)
-        
-        pil_image = Image.fromarray(img)
-        pil_image.save("screenshot.png")
-        
         return img
         
